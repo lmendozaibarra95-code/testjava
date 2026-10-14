@@ -1,0 +1,1035 @@
+<?php
+
+use PHPMailer\PHPMailer\{PHPMailer, SMTP, Exception};
+
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
+
+if (isset($_POST['submit'])) {
+
+    $nombre = $_POST['nombre'];
+    $email = $_POST['email'];
+    $asunto = $_POST['asunto'];
+    $mensaje = $_POST['mensaje'];
+
+    $ip = $_SERVER["REMOTE_ADDR"];
+    $captcha = $_POST['g-recaptcha-response'];
+    $secretKey = '6LfE12AkAAAAAGy3nAm338reVH3djfyEHrikef5z';
+
+    $errors = array();
+
+    $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaResponse}&remoteip={$ip}");
+
+    $atributos = json_decode($response, TRUE);
+
+    if (!$atributos['success']) {
+        $errors[] = 'Verifica el captcha';
+    }
+
+    if (empty($nombre)) {
+        $errors[] = 'El campo nombre es obligatorio';
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'La dirección de correo electrónico no es válida';
+    }
+
+    if (empty($asunto)) {
+        $errors[] = 'El campo asunto es obligatorio';
+    }
+
+    if (empty($mensaje)) {
+        $errors[] = 'El campo mensaje es obligatorio';
+    }
+
+    if (count($errors) == 0) {
+
+        $msj = "De: $nombre <a href='mailto:$email'>$email</a><br>";
+        $msj .= "Asunto: $asunto<br><br>";
+        $msj .= "Cuerpo del mensaje:";
+        $msj .= '<p>' . $mensaje . '</p>';
+        $msj .= "--<p>Este mensaje se ha enviado desde un formulario de contacto de Código de programación.</p>";
+
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->SMTPDebug = SMTP::DEBUG_OFF;
+            $mail->isSMTP();
+            $mail->Host = 'mail.dominio.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'correo@dominio.com';
+            $mail->Password = 'TuPassword';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port = 465;
+
+            $mail->setFrom('correo@dominio.com', 'Emisor');
+            $mail->addAddress('contacto@dominio.com', 'Receptor');
+            //$mail->addReplyTo('otro@dominio.com');
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Formulario de contacto';
+            $mail->Body = utf8_decode($msj);
+
+            $mail->send();
+
+            $respuesta = 'Correo enviado';
+        } catch (Exception $e) {
+            $respuesta = 'Mensaje ' . $mail->ErrorInfo;
+        }
+    }
+}
+
+?>
+
+
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="EUROAMERICANA DE CALZADO S.A DE C.V. es una empresa dedicada a la fabricación de calzado
+		que reúne calidad total, para satisfacer las necesidades de sus clientes y de la sociedad mediante la implementación de procesos
+		de innovación y principalmente llevar a cabo la mejora continua a través de un sistema de gestión de calidad; y así poder contribuir al
+		cuidado del medio ambiente. " />
+        <meta name="EUROAMERICANA DE CALZADO S.A DE C.V." content="" />
+		<meta name="keywords" content="fabrica de calzado, fabrica en león gto, fabricación de calzado, euroamericana, fabrica euroamericana,
+										euroamerciana de calzado, maquíla de calzado en león gto, producción de calzado "/>
+        <title>Euroamericana de Calzado</title>
+
+        <link rel="icon" type="image/x-icon" href="recursos/Logo.png" />
+		<link href="https://unpkg.com/aos@next/dist/aos.css" rel="stylesheet"/>
+		<script src="https://unpkg.com/aos@next/dist/aos.js" ></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-1-square" viewBox="0 0 16 16">
+  <path d="M9.283 4.002V12H7.971V5.338h-.065L6.072 6.656V5.385l1.899-1.383h1.312Z"/>
+  <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2Zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2Z"/>
+</svg>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300&display=swap" rel="stylesheet">
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    </head>
+
+    <body id ="inicio"class="d-flex flex-column h-100">
+        <main class="flex-shrink-0">
+            <!-- Navigation-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-white navbar-fixed-top">
+                <div class="container px-3">				
+                    <a class="navbar-brand" href="#inicio">
+						<img src="recursos/Logo.png" class="tam_logo" alt="Euroamericana de calzado logo">
+						</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span></button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 tipotitulo">
+                            <li class="nav-item "><a class="nav-link" href="#inicio">INICIO</a></li>
+							<li class="nav-item"><a class="nav-link" href="#nuestraempresa">NUESTRA EMPRESA</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#historia">HISTORIA</a></li>
+							<li class="nav-item"><a class="nav-link" href="#bolsatrabajo">BOLSA DE TRABAJO</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#colaboradores">COLABORADORES</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#contacto">CONTACTO</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+			<header>
+			</header>
+            <!-- Header-->
+
+ <div id="carouselExampleCaptions" id="inicio" class="carousel slide" data-bs-ride="carousel">
+		<div class="carousel-indicators">
+		  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+		  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+		  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+		</div>
+			<div class="carousel-inner ">
+		  <div class="carousel-item active movil-slider1" class="filtro" style=" background-image: linear-gradient(0deg, rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('recursos/slider1.webp')" >
+			<div class="carousel-caption desabajo">
+			  <h1 class="tipotitulo titulo-slide">Euroamericana</h1>
+			  <p class="tipoparrafo parra">Somos una empresa de manufactura de calzado, desde <b>1983</b> nos hemos especializado en la <b>fabricación de calzado deportivo
+				 y de confort</b> caracterizándonos por el uso de materiales de la más alta calidad y con las tendencias de moda.</p>
+			</div>
+		  </div>
+		  	<div class="carousel-item filtro" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('recursos/slider5.webp');" >
+			<div class="carousel-caption desabajo">
+			  <h1  class="tipotitulo titulo-slide ">Manufactura especializada</h1>
+			  <p class="parra tipoparrafo">Proveemos manufactura de la más alta <b>calidad</b> a nuestros clientes.</p>
+			  </div>
+		  </div>
+		  <div class="carousel-item filtro" style="background-image: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('recursos/slider2.webp')" >
+			<div class="carousel-caption desabajo">
+			  <h1  class="tipotitulo titulo-slide">Experiencia en el Mercado</h1>
+			  <p  class="parra tipoparrafo">Nuestra marca <B>SIDNEY</B> nos permitió posicionarnos en el mercado nacional durante muchos años,
+			  la cual desde un inicio demostró ser una marca <B>comprometida</B> con las necesidades de esa época, desarrollando <B>calzado deportivo de calidad.</B></p>
+			  </div>
+		  </div>
+		</div>
+		
+		
+		
+		
+	<!--	
+		
+			<div class="carousel-inner ">
+		  <div class="carousel-item active movil-slider1" class="filtro"  >
+			<div class="carousel-caption desabajo">
+			  <h1 class="tipotitulo titulo-slide">Euroamericana</h1>
+			  <p class="tipoparrafo parra">Somos una empresa de manufactura de calzado, desde <b>1983</b> nos hemos especializado en la <b>fabricación de calzado deportivo
+				 y de confort</b> caracterizándonos por el uso de materiales de la más alta calidad y con las tendencias de moda.</p>
+			</div>
+		  </div>
+		  	<div class="carousel-item filtro movil-slider2" >
+			<div class="carousel-caption desabajo">
+			  <h1  class="tipotitulo titulo-slide ">Manufactura especializada</h1>
+			  <p class="parra tipoparrafo">Proveemos manufactura de la más alta <b>calidad</b> a nuestros clientes.</p>
+			  </div>
+		  </div>
+		  <div class="carousel-item filtro movil-slider3">
+			<div class="carousel-caption desabajo">
+			  <h1  class="tipotitulo titulo-slide">Experiencia en el Mercado</h1>
+			  <p  class="parra tipoparrafo">Nuestra marca <B>SIDNEY</B> nos permitió posicionarnos en el mercado nacional durante muchos años,
+			  la cual desde un inicio demostró ser una marca <B>comprometida</B> con las necesidades de esa época, desarrollando <B>calzado deportivo de calidad.</B></p>
+			  </div>
+		  </div>
+		</div>
+	  -->	
+		
+		
+		<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+		  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+		  <span class="visually-hidden">Atrás</span>
+		</button>
+		<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+		  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+		  <span class="visually-hidden">Siguiente</span>
+		</button>
+  </div>
+  
+  
+
+<!-- Page Content -->
+ <header id="nuestraempresa"class="colordefondo">
+                <div class="container px-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-12 col-xxl-12">
+                            <div class="text-center my-5">
+                                <h1 data-aos="fade-up"class="mb-3 tipotitulo ">Nuestra Empresa</h1>
+                                <p  data-aos="fade-up"class="lead2 mb-4 tipoparrafo"><b>EUROAMERICANA DE CALZADO S.A DE C.V.</b> es una empresa dedicada a la fabricación de calzado que reúne <b>calidad total</b>,
+								para satisfacer las necesidades de sus clientes y de la sociedad mediante la implementación de <b>procesos de innovación</b> y principalmente llevar a cabo la mejora
+								continua a través de un <b>sistema de gestión de calidad</b>; y así poder contribuir al cuidado del <b>medio ambiente.</b> </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+<!--Nuestros Clientes -->
+<div class="container">
+	<section class="lg-12 align-items-center container bg-lighter py-5">
+	  <h2 data-aos="fade-up"class="mb-3 tipotitulo text-center sin">
+		Nuestras Alianzas
+	  </h2>
+	<div class=" col-lg-12 ">
+        <div class="row gx-5 row-cols-1 row-cols-md-1 ">
+            <div class="col mb-5 h-100">
+				    <div data-aos="fade-up" class="col row">
+					<div class="col logos_marcas">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img src="recursos/columbia.webp" class="tam_logo3 rounded-image-social" alt="calzado columbia logo">
+							</div>
+						</div>
+						<div class="col logos_marcas">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img src="recursos/andrea.webp" class="slide tam_logo3 rounded-image-social " alt="calzado andrea logo">
+							</div>
+						</div>
+						
+						<div class="col logos_marcas ">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img src="recursos/lacoste.webp" class="tam_logo3 rounded-image-social" alt="calzado lacoste logo">
+							</div>
+						</div>
+						<div class="col logos_marcas">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img  src="recursos/jeep.webp" class="tam_logo3 rounded-image-social" alt="calzado jeep logo">
+							</div>
+						</div>
+						<div class="col logos_marcas ">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img src="recursos/airwalk.webp" class="tam_logo3 rounded-image-social" alt="calzado airwalk logo">
+							</div>
+						</div>
+					
+						<div class="col logos_marcas">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img src="recursos/cat.webp" class="tam_logo3 rounded-image-social" alt="calzado caterpillar logo">
+							</div>
+						</div>						
+						
+						<div class="col logos_marcas">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img src="recursos/dc.webp" class="tam_logo3 rounded-image-social" alt="tenis dc logo">
+							</div>
+						</div>
+						
+						<div class="col logos_marcas">
+								 <div class="feature2   text-white rounded-3 mb-3">
+								<img  src="recursos/lasbro.webp" class="tam_logo3 rounded-image-social" alt="calzado lasbro logo">
+							</div>
+						</div>
+                </div>
+            </div>
+        </div>
+    </div>
+	</section>
+</div>
+<!-- Información que pudiera ir en el sitio  -->	
+<!--
+		<div class="container">
+			<div class="">
+			<p data-aos="fade-up"class="lead2 mb-4 tipoparrafo text-center">
+			Contamos con <b>laboratorio de prueba de materiales</b>, donde ponemos a prueba diferentes productos de proveedores,
+			para así elegir la mejor opción para la elaboración del calzado, de acuerdo con los <b>estándares de calidad</b> del cliente.
+			</div>
+		</div>
+	<div class="container col-lg-12">
+        <div class="row gx-5 row-cols-1 row-cols-md-1">
+            <div class="col mb-5 h-100">
+				    <div data-aos="fade-up" class="col row ">
+						<div class="col padding-maquina">
+								 <div class="text-black rounded-3 mb-3">
+								<img src="recursos/img5.jpg" class="slide tam_logo4_maquina rounded-image-social " alt="Prueba desgaste de suela con fricción">
+								<div class="col-12">
+									<b>Flexómetro de calzado</b> <br>
+									Prueba de flexión de calzado
+								</div>
+							</div>
+						</div>
+						<div class="col padding-maquina">
+							 <div class="text-black rounded-3 mb-3">
+								<img data-aos="fade-up" src="recursos/img4.jpg" class="slide tam_logo4_maquina rounded-image-social " alt="Prueba desgaste de suela con fricción">
+								<div class="col-12">
+									<b>Abrasímetro tipo DIN </b> <br>
+									Prueba de Abrasión de desgaste de materiales
+								</div>
+							</div>
+						</div>
+						</div>
+            </div>
+        </div>
+    </div>
+		<div class="container col-lg-12 ">
+        <div class="row gx-5 row-cols-1 row-cols-md-1">
+            <div class="col mb-5 h-100">
+				    <div data-aos="fade-up" class="col row  ">
+						<div class="col padding-maquina">
+								 <div class=" text-black rounded-3 mb-3">
+								<img  data-aos=" fade-up"src="recursos/img2.jpg" class="slide tam_logo4 rounded-image-social " alt="Prueba desdegue de suela">
+								<div class="col-12">
+								<b>Maquina SDS </b> <br>
+									Prueba de resistencia de pegado de suela
+								</div>
+							</div>
+						</div>
+						<div class="col padding-maquina ">
+							 <div class="text-black rounded-3 mb-3">
+								<img src="recursos/img3.jpg" class="tam_logo4 rounded-image-social" alt="Prueba de elasticidad de pieles y sintéticos">
+								<div class="col-12">
+								<b>Maquina SDS </b> <br>
+									Prueba de elasticidad de materiales
+
+								</div>
+							</div>
+						</div>
+                </div>
+            </div>
+        </div>
+    </div>
+-->	
+	
+<!--FIN de Información que pudiera ir en el sitio-->
+				<!--Prueba-->
+				  <section class="row  py-55 col-lg-12 ">
+				 <article data-aos="flip-left" class="col-lg-6 bg-white fondo">
+				<div class="container px-5 my-4">
+                    <div class="row col-lg-12 gx-5 ">
+						<div data-aos="fade-up" class="container2 col-lg-6  my-4">
+						<!--<img class="img-fluid mb-0 mb-lg-0 img-total" src="recursos/empresa1.jpg" alt="..." /> -->
+						</div>
+                    </div>
+                </div>
+				 </article>
+				 <article class="col-lg-6 colorparrafo">
+						 <div class=" px-5 my-4">
+                    <div class="row col-lg-12 gx-0 colorfondo" id="historia">
+                        <div class="container2 col-lg-6 my-4 " >
+						<div data-aos="fade-up">
+                           <h1 class="mb-3 tipotitulo tipotitulo centralizar-izq" >Historia</h1>
+						   <div  class="border2">
+						   </div>
+						   </div>
+						   <br>
+						   <div class="col-lg-12">
+                            <p data-aos="fade-up"class="lead2 mb-0 tipoparrafo tipoparrafo2">Desde nuestra fundación el 19 de marzo de <b>1983</b>, Tenemos como misión <b>diseñar, fabricar y vender calzado de alta calidad </b>
+							buscando satisfacer las necesidades de nuestros clientes. Nuestra marca <b>SIDNEY</b> nos permitió posicionarnos en el mercado nacional durante muchos años, la cual desde
+							un inicio demostró ser una marca <b>comprometida</b> con las necesidades de esa época, desarrollando <b>calzado urbano y deportivo de calidad</b>.</p>
+							</div>
+							<br>
+							<div class="col-lg-12">
+							<p data-aos="fade-up"class="lead2 mb-0 tipoparrafo tipoparrafo2">
+							Hoy en día después de <b>39 años</b> en el mercado, actualmente nos hemos consolidado en un grupo conformado
+							por <b>EUROAMERICANA DE CALZADO S.A DE C.V. y OPTIDISEÑO Y SUPERVISIÓN S.A. DE C.V.</b>, que en conjunto con nuestro personal y con la infraestructura
+							con la que contamos nos permite cumplir las expectativas y necesidades de nuestros clientes, especializándonos en el <b>calzado urbano y deportivo</b> mediante la
+							implantación de <b>procesos de innovación</b>, logrando de esta forma llevar acabo procesos de mejora continua, a través de un <b>sistema de gestión de la calidad</b>,
+							dichos procesos nos han permitido manufacturar calzado de grandes marcas como Andrea, DC, CAT etc.</p>
+                        </div>
+						</div>
+                    </div>
+                </div>
+				 </article>
+				 </section>
+				  	  <section class="row  col-lg-12 " id="">
+				 <article  class="col-lg-6 colorparrafo">
+						 <div class="px-5 my-4">
+                    <div class="row col-lg-12 gx-0 ">
+                        <div class="container2 col-lg-6 my-4 " >
+						   <div class="col-lg-12">
+                             <p data-aos="fade-up" class="lead2 mb-0 tipoparrafo tipoparrafo2">Actualmente el mercado que abarcamos es <b>Nacional</b>, sin embargo, por nuestra <b>capacidad productiva y
+							experiencia</b> en nuestros productos, estamos listos para poder abarcar <b>mercados internacionales</b> y así poder diversificar nuestros productos,
+							por ello desde el <b>2011</b>, hemos creado nuestra comercializadora <b>EUROAMERICANA LLC</b> ubicada en Houston, Texas.
+							Nos encontramos ubicados en una zona estratégica de la ciudad de <b>León Guanajuato</b>,
+							 ya que se encuentra entre las principales vías de esta ciudad. Nuestra ubicación es: <b>Av.
+							 Tecnológico No. 205. Fracc. Industrial Julián de Obregón, C.P. 37290 en León Gto, México</b>. </p>
+							</div>
+							<br>
+						</div>
+                    </div>
+                </div>
+				 </article>
+				 <article data-aos="flip-left" class="col-lg-6 bg-white  fondo2">
+				<div class="container px-5 my-0">
+                    <div class="row col-lg-12 gx-5">
+					<div data-aos="fade-up" class="container2 col-lg-6  my-4">
+						<!--<img class="img-fluid mb-0 mb-lg-0 img-total" src="recursos/empresa2.jpg" alt="..." /> -->
+						</div>
+                    </div>
+                </div>
+				 </article>
+				 </section>
+				 <!-- Bolsa de trabajo section-->
+	<section class="py-4 colorparrafo container" id="bolsatrabajo">
+							<div data-aos="fade-up">
+												<h1 class="mb-3 tipotitulo" data-aos="fade-up" id="centralizar">Bolsa de Trabajo</h1>
+													<p class="mb-5 tipoparrafo lead2">
+												Consulta nuestra oferta laboral y únete a nuestro equipo de trabajo.
+													</p>
+							</div>
+                    <div class="row gx-5">
+                        <div class="col-lg-12">
+                            <div class="row gx-5 row-cols-1 row-cols-md-2">
+                                <div data-aos="fade-up" class="col mb-5 h-100">
+                                    <div class="bg-gradient text-white rounded-3 mb-3">
+									<a href="https://www.computrabajo.com.mx/">
+									<img data-aos="fade-up"id="animacion" src="recursos/ct.png" class="tam_logo2 rounded-image-social" alt="euroamericana computrabajo bolsa de trabajo">
+									</a>
+									</div>
+									<a class="sinsub"href="https://www.computrabajo.com.mx/">
+                                    <h4  class="h5 tipotitulo colorlogo " >Computrabajo</h4>
+									</a>
+                                    <p  class="mb-0 tipoparrafo lead2">
+									Revisa nuestras vacantes disponibles.
+									</p>
+                                </div>
+                                <div data-aos="fade-up" class="col mb-5 h-100">
+                                    <div class="bg-gradient text-white rounded-3 mb-3">
+									<a href="https://mx.linkedin.com/">
+									<img data-aos="fade-up" src="recursos/linkedin.png" class="tam_logo2 rounded-image-social" alt="euroamerciana linkedin bolsa de trabajo">
+									</a>
+									</div>
+								    <a class="sinsub" href="https://mx.linkedin.com/">
+                                    <h4  class=" h5 tipotitulo colorlogo">LinkedIn</h4>
+
+									</a>
+                                     <p  class="mb-0 tipoparrafo lead2">
+									 Únete a nuestro perfil profesional de LinkedIn.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+					
+					<!--Vacantes -->	
+					<div data-aos="fade-up">
+						<h1 class="mb-3 tipotitulo" data-aos="fade-up" id="centralizar">Vacantes de Talentos</h1>
+							<p class="mb-5 tipoparrafo lead2">
+								Lista actualizada 05 de DICIEMBRE del 2022
+							</p>
+				    </div>
+					
+					<div class="px-5 my-4">
+                    <div class="row gx-5">
+                 <div class="col-lg-12">
+                     <div class="row gx-5 row-cols-1 row-cols-md-2 lead2">
+                                <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>1.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Pespuntadores completos.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>2.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Pespuntadores medios.</p>
+                                </div>
+                            </div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+						 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>3.</h2>
+										</div>
+						</div>
+						<div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Preliminares corte, pespunte montado.</p>
+						</div>
+						</div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+								  <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>4.</h2>
+						</div>
+						</div>
+						<div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Embarrador de primer.</p>
+						</div>
+						</div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+								 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>5.</h2>
+									</div>
+						</div>
+						<div class="col-10 centro">
+                                    <p  class="mb-0 tipoparrafo">Embarrador de zapato.</p>
+						</div>
+						</div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+								 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>6.</h2>
+									</div>
+						</div>
+						<div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Adornadora, emplantilladora y encajilladora.</p>
+						</div>
+						</div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>7.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Pegador.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>8.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Rayador de zapato.</p>
+                                </div>
+                            </div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>9.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Ojillador, revolteadora y encintadora.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>10.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Conformador.</p>
+                                </div>
+                            </div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>11.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Calzador.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>12.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Cardador de Mototool.</p>
+                                </div>
+                            </div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>13.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Cortador de piel.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>14.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Cortador de piel y sintético.</p>
+                                </div>
+                            </div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>15.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Inspector de calidad.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>16.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Halogenador.</p>
+                                </div>
+                            </div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>17.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Auditor de calidad.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>18.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Intendente sexo femenino.</p>
+                                </div>
+                            </div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>19.</h2>
+									</div>
+							</div>
+							
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Prensador.</p>
+							</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-0 h-100">
+						<div class="col-12 row">
+						<div class="col-2 ">
+                                    <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>20.</h2>
+									</div>
+						</div>
+					    <div class="col-10 centro">
+                                    <p class="mb-0 tipoparrafo">Revolteadora.</p>
+                                </div>
+                            </div>
+                    </div>
+					 <div data-aos="fade-up" class="col mb-0 h-100">										
+						<div class="col-12 row">
+							<div class="col-2 ">
+									 <div class="feature2   text-vacantes rounded-3 mb-0">
+										<i class="bi bi-1-square colorlogo" alt="prestaciones euroamericana"></i>
+										<h2>21.</h2>
+									</div>
+							</div>
+							<div class="col-10 centro">
+										<p  class="mb-0 tipoparrafo">Chofer con licencia C para camión de 5 toneladas para el área de embarque.</p>
+							</div>
+						</div>
+                                </div> 				
+                    </div>
+                </div>
+            </section>
+		   </div>
+		</div>	
+			<section class=' container mb-5'>
+					<div data-aos="fade-up">
+							<p class="mb-0 tipoparrafo lead2">
+							<br>
+								Interesados presentarse con solicitud elaborada de <b>8:00 a.m a 2:00 p.m</b> de lunes a viernes, en Avenida Tecnológico 205
+								Fracc. Industrial Julián de Obregon. En Recursos humanos tel. <b>477 7 11 2820</b> y/o enviar <b>curriculum vitae</b> al correo:
+								<div class=' partir-texto'> <b>reclutamiento@euroamericana.com.mx</b> </div>
+							</p>
+				</div>		
+			</section>					
+					<!--Vacantes -->
+					<section class="bg-white">
+                <div class="px-5 my-4">
+				<h1 data-aos="fade-up"class="mb-3 tipotitulo" id="centralizar">Beneficios del colaborador</h1>
+                    <div class="row gx-5">
+                 <div class="col-lg-12">
+                     <div class="row gx-5 row-cols-1 row-cols-md-2 lead2">
+                                <div data-aos="fade-up" class="col mb-5 h-100">
+						<div class="col-12 row">
+						<div class="col-3 ">
+								 <div class="feature2   text-white rounded-3 mb-0">
+									<i class="bi bi-piggy-bank colorlogo" alt="prestaciones euroamericana"></i>
+									</div>
+						</div>
+						<div class="col-9 centro">
+                                    <p  class="mb-0 tipoparrafo">Prestaciones superiores de ley.</p>
+						</div>
+						</div>
+                                </div>
+                    <div data-aos="fade-up" class="col mb-5 h-100">
+						<div class="col-12 row">
+						<div class="col-3 ">
+                                    <div class="feature2  text-white rounded-3 mb-0">
+
+									<i class="bi bi-calendar-date-fill colorlogo" alt="bolsa de trabajo euroamericana"></i>
+									</div>
+						</div>
+					    <div class="col-9 centro">
+                                    <p class="mb-0 tipoparrafo">Periodos vacacionales de semana santa y navidad.</p>
+                                </div>
+                            </div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-5 h-100">
+						<div class="col-12 row">
+						<div class="col-3 ">
+								 <div class="feature2   text-white rounded-3 mb-0">
+									<i class="bi bi-cash colorlogo"></i>
+									</div>
+						</div>
+						<div class="col-9 centro">
+                                    <p class="mb-0 tipoparrafo">Vales de útiles escolares.</p>
+						</div>
+						</div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-5 h-100">
+						<div class="col-12 row">
+						<div class="col-3 ">
+								 <div class="feature2  text-white rounded-3 mb-0">
+
+									<i class="bi bi-check-square colorlogo"></i>
+									</div>
+						</div>
+						<div class="col-9 centro">
+                                    <p class="mb-0 tipoparrafo">Premio de asistencia, puntualidad y productividad.</p>
+						</div>
+						</div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-5 h-100">
+						<div class="col-12 row">
+						<div class="col-3 ">
+								 <div class="feature2   text-white rounded-3 mb-0">
+									<i class="bi bi-pencil colorlogo"></i>
+									</div>
+						</div>
+						<div class="col-9 centro">
+                                    <p  class="mb-0 tipoparrafo">Plan de estudios (primaria, secundaria, preparatoria e ingeniería gratuito).</p>
+						</div>
+						</div>
+                    </div>
+					<div data-aos="fade-up" class="col mb-5 h-100">
+						<div class="col-12 row">
+						<div class="col-3 ">
+								 <div class="feature2   text-white rounded-3 mb-0">
+									<i class="bi bi-clipboard-plus colorlogo"></i>
+									</div>
+						</div>
+						<div class="col-9 centro">
+                                    <p class="mb-0 tipoparrafo">Servicio médico, óptico, nutrición, psicólogo, quiropráctico.</p>
+						</div>
+						</div>
+                    </div>
+                    </div>
+                </div>
+            </section>
+		   </div>
+		</div>
+	</section>
+		<div class="fondos4">
+			</div>
+				<!-- Page content-->
+			<div class="">
+            <section class="container py-4" id="colaboradores">
+             <div class="">
+				<h1 data-aos="fade-up"class="mb-3 tipotitulo" id="centralizar">Colaboradores</h1>
+                        <div class="col-lg-12">
+                            <div class="row gx-5 row-cols-1 row-cols-md-2">
+                                <div data-aos="fade-up" class="col mb-5 h-100">
+                                    <div class="feature2 text-white rounded-3 mb-3">
+									<a class="sinestilo" href="https://euroamericanamx.sharepoint.com/">
+									<i class="bi bi-cloud colorlogo"></i>
+									</a>
+									</div>
+									<a class="sinsub" href="https://euroamericanamx.sharepoint.com/">
+                                    <h4 class="h5 tipoparrafo colorlogo">Sharepoint</h4>
+									</a>
+                                    <p  class="mb-0 tipoparrafo lead2">Espacio de trabajo para nuestros colaboradores.</p>
+                                </div>
+                                <div data-aos="fade-up" class="col mb-5 h-100">
+                                    <div class="feature2 text-white rounded-3 mb-3">
+									<a class="sinestilo" href="https://webmail.euroamericana.com.mx">
+									<i class="bi bi-envelope colorlogo"></i>
+									</a>
+									</div>
+									<a class="sinsub" href="https://webmail.euroamericana.com.mx">
+                                    <h4 class="h5 tipoparrafo colorlogo">Webmail</h4>
+									</a>
+                                    <p class="mb-0 tipoparrafo lead2">Fácil acceso a tu correo electrónico de colaborador.</p>
+                                </div>
+                            </div>
+                        </div>
+               </div>
+            </section>
+			</div>
+			<section class="bg-white"  id="contacto">
+                <div class="container px-5"id="contacto">
+                    <!-- Contact form-->
+                    <div class="py-4  rounded-3 px-4 px-md-5 mb-5">
+                        <div class="text-center">
+                           <h1 data-aos="fade-up"class="mb-3 tipotitulo" id="centralizar">Contacto</h1>
+                        </div>
+                        <div class="row gx-5 ">
+                            <div class="col-lg-6 col-xl-6 mb-5" data-aos="fade-up-right">
+							<h3 data-aos="fade-up" class="tipotitulo">¡Escribenos!</h3>
+                                <form class="py-4" method="post"  action="<?php echo htmlentities($_SERVER['PHP_SELF']); ?>" autocomplete="off">
+                                    <!-- Nombre-->
+                                    <div class="form-floating mb-3">
+                                        <input class="form-control" id="validationCustom01" name="nombre" type="text" placeholder="Ingresa tu Nombre..." data-sb-validations="required" required />
+                                        <label for="validationCustom01" class="tipoparrafo form-label" >Nombre completo</label>
+                                        <div class="invalid-feedback tipoparrafo" data-sb-feedback="name:required">Requiere Nombre.</div>
+                                    </div>
+                                    <!--correo-->
+                                    <div class="form-floating mb-3">
+                                        <input class="form-control" id="correo" name="correo" type="email" placeholder="correo@example.com" data-sb-validations="required" required />
+                                        <label for="correo" class="tipoparrafo">Correo Electrónico</label>
+                                        <div class="invalid-feedback tipoparrafo" data-sb-feedback="email:required">Requiere correo electrónico.</div>
+                                        <div class="invalid-feedback tipoparrafo" data-sb-feedback="email:email">Correo electrónico no valido.</div>
+                                    </div>
+                                    <!--teléfono-->
+                                    <div class="form-floating mb-3">
+                                        <input class="form-control" name="telefono" id="telefono" type="tel" placeholder="477 000 0000" data-sb-validations="required, phone" required />
+                                        <label for="telefono" class="tipoparrafo">Teléfono</label>
+                                        <div class="invalid-feedback tipoparrafo" data-sb-feedback="phone:required">Requiere número de teléfono.</div>
+									</div>
+									 <!--Asunto---->
+                                    <div class="form-floating mb-3">
+                                        <input class="form-control" name="asunto" id="asunto" type="text" placeholder="Ingresa Asunto del mensaje" data-sb-validations="required" required />
+                                        <label for="asunto" class="tipoparrafo">Asunto</label>
+                                        <div class="invalid-feedback tipoparrafo" data-sb-feedback="phone:required">Requiere Asunto.</div>
+                                    </div>
+
+                                    <!--Mensaje-->
+                                    <div class="form-floating mb-3">
+                                        <textarea class="form-control" id="mensaje" name="mensaje" type="text" placeholder="Ingresa tú mensaje..." style="height: 10rem" data-sb-validations="required" required></textarea>
+                                        <label for="mensaje" class="tipoparrafo">Mensaje</label>
+                                        <div class="invalid-feedback tipoparrafo" data-sb-feedback="message:required">Requiere Mensaje.</div>
+                                    </div>
+
+                                    <!--mensaje envíado-->
+                                    <div class="d-none" id="submitSuccessMessage">
+                                        <div class="text-center mb-3">
+                                            <div class="tipoparrafo">Formulario enviado!</div>
+                                            <br />
+                                            <a href="#INICIO">IR A INICIO</a>
+                                        </div>
+                                    </div>
+                                    <!--Error al enviar el Mensaje-->
+                                    <!---->
+                                    <div class="d-none tipoparrafo" id="errorMensaje">
+									<div class="text-center text-danger mb-3">Error al envíar el mensaje!</div></div>
+
+
+<div class="form-floating mb-3">
+	<div class="g-recaptcha" data-sitekey="6LfE12AkAAAAAGy3nAm338reVH3djfyEHrikef5z"> </div>
+</div>
+
+
+
+
+
+
+                                    <!--boton-->
+                                    <div class="d-grid">
+									<input class="btn btn-primary btn-lg tipoparrafo" id="submitbutton" value="Enviar"type="submit"/>
+									</div>
+                                </form>
+                            </div>
+							<div class="row col-lg-6 col-xl-6  row mb-1" >
+							<h3 data-aos="fade-up" class="tipotitulo" id="titulos">¡Ubícanos!</h3>
+								<iframe data-aos="fade-up" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1106.6151868947384!2d-101.63303402380747!3d21.10479155675598!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x842bbe6ed1bdb625%3A0x98c0e66e8c24c66b!2sAv.%20del%20Tecnol%C3%B3gico%20205%2C%20Industrial%20Julian%20de%20Obregon%2C%2037290%20Le%C3%B3n%2C%20Gto.!5e0!3m2!1ses-419!2smx!4v1656079255131!5m2!1ses-419!2smx"
+								width="100%" height="85%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+							</div>
+                        </div>
+                    </div>
+                    <!--Datos-->
+                </div>
+	        </section>
+			<section class="py-5 " id="">
+				<div class="container px-5 my-1">
+					 <div class="row gx-5">
+						<div class="col-lg-12">
+                            <div class="row gx-5 row-cols-1 row-cols-md-3 row-cols-md-3-3 tipoparrafo lead2">
+
+								<div data-aos="fade-up" class="col mb-5 h-100">
+                                    <div class="feature  text-white rounded-3 mb-3">
+									<i class="bi bi-geo-alt colorlogo"></i>
+									</div>
+                                    <h2 class="h5">Dirección</h2>
+                                    <p class="mb-0">Av. Tecnológico 205 Col. Fracc. Industrial Julián de Obregón. León, Guanajuato, México.</p>
+                                </div>
+
+								 <div data-aos="fade-up"class="col mb-5 h-100">
+                                    <div class="feature  text-white rounded-3 mb-3">
+									<i class="bi bi-telephone colorlogo"></i>
+									</div>
+                                    <h2 class="h5">Teléfono</h2>
+                                    <p class="mb-0">+52 477 711 28 20</p>
+                                </div>
+
+							    <div data-aos="fade-up" class="col mb-5 h-100 partir-texto">
+                                    <div class="alinear feature text-white rounded-3 mb-3">
+									<i class="bi bi-envelope colorlogo"></i>
+									</div>
+                                    <h2 class="h5">Correo Electrónico</h2>
+                                    <p class="mb-0">webmaster@euroamericana.com.mx </p>
+                                </div>
+                            </div>
+                        </div>
+						</div>
+						</div>
+						</section>
+	        </main>
+        <!-- Footer-->
+        <footer class="bg-dark py-4 mt-auto">
+            <div class="container px-5">
+                <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                    <div class="col-auto"><div class="small m-0 text-white">Copyright &copy; 2022 EUROAMERICANA DE CALZADO S.A DE C.V.</div></div>
+                    <div class="col-auto">
+                        <a class="link-light small" href="aviso.html">Aviso de Privacidad</a>
+                        <span class="text-white mx-1">&middot;</span>
+                        <a class="link-light small" href="#contacto">Contacto</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+		 <script src="https://unpkg.com/aos@next/dist/aos.js" ></script>
+	 <script>
+		AOS.init();
+	 </script>
+    </body>
+</html>
